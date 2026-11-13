@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Glow</title>
+<style>
+:root{--bg:#0a0c1c;--g:rgba(255,255,255,.06);--gb:rgba(255,255,255,.11);--tx:#eef0ff;--mu:#8d93b8;--a:#5ef0d0;--b:#8b7bff;--w:#ff9d5c;box-sizing:border-box}
+*{box-sizing:inherit;-webkit-tap-highlight-color:transparent}
+body{margin:0;color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg) radial-gradient(120% 60% at 80% -10%,#2a1f6b 0,transparent 60%) fixed;padding:env(safe-area-inset-top) 0 96px;min-height:100vh}
+#v{max-width:560px;margin:0 auto;padding:14px}
+h1{font:800 26px/1.1 system-ui,sans-serif;letter-spacing:-.5px;margin:4px 0}h2{font:700 15px system-ui;margin:20px 0 8px;color:var(--mu)}
+.mu{color:var(--mu);font-size:13px}.c{background:var(--g);border:1px solid var(--gb);border-radius:18px;padding:12px;margin:10px 0;backdrop-filter:blur(10px)}
+.hero{background:linear-gradient(135deg,rgba(94,240,208,.16),rgba(139,123,255,.2));border:1px solid var(--gb);border-radius:24px;padding:16px;margin:6px 0}
+.t{display:flex;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--gb);cursor:pointer}.t:last-child{border:0}
+.bx{flex:none;width:26px;height:26px;border:2px solid var(--mu);border-radius:9px;display:grid;place-items:center;font-size:15px;color:#0a0c1c;transition:.15s}
+.t.on .bx{background:linear-gradient(135deg,var(--a),var(--b));border-color:transparent}.t.on .tt{color:var(--mu);text-decoration:line-through}.t.no .tt{color:var(--w)}
+.cur{border-color:var(--a)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+button,select,input,textarea{font:inherit;color:var(--tx);background:var(--g);border:1px solid var(--gb);border-radius:12px;padding:9px 12px}
+button.p{background:linear-gradient(135deg,var(--a),var(--b));color:#0a0c1c;border:0;font-weight:700}button.s{padding:6px 11px;font-size:14px}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,12,28,.85);backdrop-filter:blur(14px);border-top:1px solid var(--gb);padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;border:0;border-radius:0;background:none;padding:11px 2px;font-size:11px;color:var(--mu)}.nav button.a{color:var(--a);font-weight:700}.nav b{display:block;font-size:19px}
+.n5{display:flex;gap:6px}.n5 button{flex:1;padding:8px 0}.n5 button.a{background:var(--w);color:#0a0c1c;border:0;font-weight:800}
+.bar{height:8px;background:var(--g);border-radius:5px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--b))}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}.cal div{aspect-ratio:1;display:grid;place-items:center;border-radius:11px;font-size:13px;background:var(--g);cursor:pointer;position:relative}
+.cal .h{background:none;aspect-ratio:auto;color:var(--mu);font-size:11px}.cal .sel{outline:2px solid var(--b)}.cal i{position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%}
+.cols{display:flex;align-items:flex-end;gap:6px;height:80px}.cols div{flex:1;border-radius:6px 6px 0 0;min-height:3px;background:linear-gradient(var(--b),var(--a))}
+.ch{display:flex;flex-wrap:wrap;gap:6px}.ch span{background:var(--g);border:1px solid var(--gb);border-radius:20px;padding:4px 10px;font-size:13px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:6px 0}.tabs button{white-space:nowrap}.tabs .a{background:var(--b);border:0}
+.w{color:var(--w)}textarea{width:100%;height:64px}.lk{opacity:.35}
+#br{position:fixed;inset:0;background:rgba(10,12,28,.97);z-index:9;display:flex;flex-direction:column;gap:40px;align-items:center;justify-content:center}
+.bc{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b))}
+</style></head><body><div id="v"></div><div class="nav" id="nav"></div>
+<script>
+const K='glow1',$=s=>document.querySelector(s);
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const fd=k=>{const d=new Date(k+'T00:00');return d.getDate()+' '+MN[d.getMonth()]};
+const esc=t=>String(t||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const DR=()=>[{id:'r1',t:'07:30',k:'task',s:0,on:1},{id:'r2',t:'09:30',k:'stress',s:'m',on:1},{id:'r3',t:'12:30',k:'task',s:1,on:1},{id:'r4',t:'13:00',k:'water',on:1},{id:'r5',t:'15:00',k:'stress',s:'d',on:1},{id:'r6',t:'17:00',k:'water',on:1},{id:'r7',t:'20:00',k:'stress',s:'e',on:1},{id:'r8',t:'21:30',k:'task',s:2,on:1},{id:'r9',t:'22:30',k:'text',x:'Экран убрать, скоро спать',on:1}];
+const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],rem:DR(),fired:{}});
+let S;try{S=Object.assign(D0(),JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){S=D0()}
+const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const P=[{id:'sh',pr:748,n:'Шампунь VOIS',v:1000,d:6,w:3},{id:'co',pr:881,n:'Кондиционер VOIS',v:1000,d:8,w:3},{id:'oil',pr:763,n:'Аргановое масло',v:100,d:.1,w:3},{id:'spf',pr:369,n:'SPF 50+',v:50,d:1,w:7},{id:'nia',pr:350,n:'Ниацинамид 10%',v:30,d:.2,w:7},{id:'vc',pr:314,n:'Витамин C 5%',v:30,d:.3,w:7},{id:'cr',pr:271,n:'Крем с гиалуроном',v:50,d:.6,w:7},{id:'hand',pr:953,n:'Крем для рук',v:550,d:1,w:7}];
+const SL=['Утро','День','Вечер','Сон'];
+const dnum=dt=>Math.floor((new Date(ymd(dt)+'T00:00')-new Date(S.start+'T00:00'))/864e5);
+function tasks(dt){
+ const dn=dnum(dt),w=dt.getDay(),T=[],a=(s,id,t,p,h)=>T.push({s,id,t,p,h});
+ if(dn<0)return T;
+ a(0,'ch','Зарядка 5–7 минут: суставы, наклоны, приседания, планка');
+ a(0,'tb','Почистить зубы, 2 минуты');
+ a(0,'bha','Умывалка BHA, до 30 секунд');
+ if(dn==0)a(0,'pt','Проба на запястье: SPF, крем, крем для рук. Сутки без реакции, тогда начинайте');
+ if(dn>=21&&(dn>=35||dn%2==1))a(0,'vc','Витамин C на лицо','vc','2–3 капли, до ниацинамида');
+ if(dn>=1&&(dn>=15||dn%2==1))a(0,'nia','Ниацинамид','nia','3–5 капель');
+ if(dn>=1)a(0,'spf','SPF 50+ последним шагом, всегда','spf','две фаланги на лицо и шею');
+ a(1,'mv','Разминка 3 минуты: шея, плечи, кисти, пройтись');
+ a(1,'fc','Не трогать лицо, прыщи не давить');
+ if([1,4,0].includes(w)){a(2,'sh','Мытьё головы: шампунь на кожу головы','sh','длина отмоется пеной');a(2,'co','Кондиционер от середины до кончиков, расчесать гребнем'+(w==0?'. Сегодня держать 10 минут':''),'co');a(2,'oil','1–2 капли масла на влажные кончики','oil')}
+ if(w==3||w==0)a(2,'ft','Парить ноги 10–15 минут, затем крем');
+ if(w==1||w==5)a(2,'hd','Парить руки 5–10 минут');
+ a(2,'bha2','Умывалка BHA: смыть SPF, массаж 60 секунд');
+ if(dn>=1)a(2,'cr','Крем с гиалуроновой кислотой, тонким слоем','cr');
+ a(2,'hand','Крем для рук','hand');
+ a(2,'tb2','Зубы и нить, 2 минуты');
+ a(2,'st','Растяжка 10 минут: спина, бёдра, шея, грудь');
+ if(w==0)a(2,'chk','Проверить запасы во вкладке «Запасы»');
+ a(3,'sl','Лечь в '+S.sleep+', экран убрать за 30 минут');
+ return T}
+const ck=k=>S.checks[k]||{};
+const allP=()=>P.concat(S.custom||[]);
+function use(p,s){const i=S.inv[p]=S.inv[p]||{used:0},d=allP().find(x=>x.id==p).d;i.used=Math.max(0,i.used+s*d);i.tot=Math.max(0,(i.tot||0)+s*d)}
+function tog(k,id){const c=S.checks[k]=S.checks[k]||{},t=tasks(new Date(k+'T00:00')).find(x=>x.id==id);
+ if(c[id]){delete c[id];t&&t.p&&use(t.p,-1)}else{c[id]=1;t&&t.p&&use(t.p,1)}sv();R()}
+const pct=k=>{const T=tasks(new Date(k+'T00:00'));return T.length?T.filter(t=>ck(k)[t.id]).length/T.length:-1};
+const fon=k=>{const s=S.stress[k]||{},v=[s.m,s.d,s.e].filter(x=>x);return v.length?v.reduce((a,b)=>a+b)/v.length:0};
+function setSt(k,sl,v){const s=S.stress[k]=S.stress[k]||{};s[sl]=s[sl]==v?0:v;sv();R()}
+function water(k,n){S.water[k]=Math.max(0,(S.water[k]||0)+n);sv();R()}
+function lg(k,f,v,r){const g=S.log[k]=S.log[k]||{};g[f]=v;sv();if(r)R()}
+function streak(){let n=0,d=new Date();if(pct(ymd(d))<.8)d.setDate(d.getDate()-1);while(n<999&&pct(ymd(d))>=.8){n++;d.setDate(d.getDate()-1)}return n}
+function xp(){let x=0;for(const k in S.checks)x+=Object.keys(S.checks[k]).length*10;for(const k in S.water)x+=S.water[k]*2;for(const k in S.stress){const s=S.stress[k];x+=[s.m,s.d,s.e].filter(Boolean).length*5}return x+Object.keys(S.log).length*15}
+const lv=x=>Math.floor(Math.sqrt(x/50))+1;
+function ach(){const st=streak(),ks=Object.keys(S.checks);return[['Старт','Первая отметка',ks.length>0],['3 дня','Серия 3 дня',st>=3],['7 дней','Серия неделя',st>=7],['14 дней','Серия 2 недели',st>=14],['30 дней','Серия месяц',st>=30],['Идеальный день','100% дел за день',ks.some(k=>pct(k)==1)],['Водный баланс','Цель по воде 7 дней',Object.values(S.water).filter(v=>v>=S.goal).length>=7],['Спокойный фон','5 дней со стрессом до 2',Object.keys(S.stress).filter(k=>fon(k)>0&&fon(k)<=2).length>=5],['Дневник','7 записей дня',Object.keys(S.log).length>=7],['Уровень 5','Набрать 800 очков',xp()>=800]]}
+const sc=f=>`hsl(${130-(f-1)*30},70%,60%)`;
+function stressUI(k){const s=S.stress[k]||{};return[['m','Утро'],['d','День'],['e','Вечер']].map(([c,l])=>`<div class="mu" style="margin-top:8px">${l}: 1 спокойно, 5 на нервах</div><div class="n5">${[1,2,3,4,5].map(i=>`<button class="${s[c]==i?'a':''}" onclick="setSt('${k}','${c}',${i})">${i}</button>`).join('')}</div>`).join('')}
+const advice=f=>f==0?'Отметьте уровень стресса, это 10 секунд.':f>=3.5?'<span class="w">Фон напряжённый. Попробуйте дыхание 4–6 и 10 минут прогулки. Стресс бьёт по коже и волосам, сон сегодня важнее дел.</span>':f>=2.5?'Средний фон. Разминка и вода помогут сбросить напряжение.':'Спокойный день, так держать.';
+function breathe(){const o=document.createElement('div');o.id='br';o.innerHTML='<div class="bc" id="bc"></div><div id="bt" style="font-size:22px"></div><button onclick="clearInterval(window.bi);this.parentNode.remove()">Закрыть</button>';document.body.appendChild(o);let s=0,c=0;
+ const st=()=>{const b=$('#bc'),t=$('#bt');if(!b)return clearInterval(window.bi);if(s==0){b.style.transition='transform 4s ease-in-out';b.style.transform='scale(1.7)'}if(s==4){b.style.transition='transform 6s ease-in-out';b.style.transform='scale(1)'}
+ t.textContent=s<4?'Вдох '+(4-s):'Выдох '+(10-s);s++;if(s==10){s=0;c++;if(c==5){t.textContent='Готово';clearInterval(window.bi);setTimeout(()=>o.remove(),1500)}}};
+ st();window.bi=setInterval(st,1000)}
+let tab='t',sel=ymd(new Date()),cm=new Date(),sub='w',det=null;cm.setDate(1);
+function tToday(){const dt=new Date(),k=ymd(dt),T=tasks(dt),c=ck(k),dn=dnum(dt),dd=T.filter(t=>c[t.id]).length,p=T.length?dd/T.length:0,X=xp(),L=lv(X),lo=50*(L-1)**2,hi=50*L*L,hr=dt.getHours(),cs=hr<11?0:hr<17?1:hr<22?2:3;
+ const nx=T.filter(t=>!c[t.id]&&t.s>=cs)[0]||T.filter(t=>!c[t.id])[0],wn=S.water[k]||0,g=S.log[k]||{},R_=40,C=2*Math.PI*R_;
+ let h=`<div class="hero"><div class="row sp"><div><div class="mu">${hr<5?'Доброй ночи':hr<12?'Доброе утро':hr<18?'Добрый день':'Добрый вечер'}</div><h1>${dt.getDate()} ${MN[dt.getMonth()]}</h1><div class="mu">День ${dn+1}, серия ${streak()}</div></div>
+ <svg width="104" height="104" viewBox="0 0 104 104"><defs><linearGradient id="gr"><stop offset="0" stop-color="#5ef0d0"/><stop offset="1" stop-color="#8b7bff"/></linearGradient></defs><circle cx="52" cy="52" r="${R_}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="10"/><circle cx="52" cy="52" r="${R_}" fill="none" stroke="url(#gr)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 52 52)"/><text x="52" y="59" text-anchor="middle" fill="#eef0ff" font-size="22" font-weight="800">${Math.round(p*100)}%</text></svg></div>
+ <div class="row sp mu" style="margin-top:8px"><span>Уровень ${L}</span><span>${X} / ${hi} очков</span></div><div class="bar"><i style="width:${(X-lo)/(hi-lo)*100}%"></i></div>${nx?`<div style="margin-top:6px"><span class="mu">Дальше:</span> ${nx.t}</div>`:'<div style="margin-top:6px">Всё сделано, отличный день.</div>'}</div>`;
+ if(dn<21)h+=`<div class="c mu">${dn<1?'Сегодня проба средств на запястье.':dn<15?'Ниацинамид через день, первые 2 недели.':'Ниацинамид каждый день. Витамин C с 22-го дня.'}</div>`;
+ else if(dn<35)h+=`<div class="c mu">Витамин C через день, 2 недели. Потом каждый день.</div>`;
+ h+=`<div class="c"><div class="row sp"><b>Вода: ${wn} из ${S.goal}</b><span><button class="s" onclick="water('${k}',-1)">−</button> <button class="s p" onclick="water('${k}',1)">+ стакан</button></span></div><div class="bar"><i style="width:${Math.min(100,wn/S.goal*100)}%"></i></div><div class="mu">Стакан 250 мл. Пейте утром, до обеда, после обеда, вечером.</div></div>`;
+ SL.forEach((s,i)=>{const L_=T.filter(t=>t.s==i);if(L_.length)h+=`<h2>${s}</h2><div class="c ${i==cs?'cur':''}">${L_.map(t=>`<div class="t ${c[t.id]?'on':''}" onclick="tog('${k}','${t.id}')"><div class="bx">${c[t.id]?'✓':''}</div><div><div class="tt">${t.t}</div>${t.h?`<div class="mu">${t.h}</div>`:''}</div></div>`).join('')}</div>`});
+ h+=`<h2>Итог дня</h2><div class="c"><div class="mu">Как кожа сегодня: 1 плохо, 5 отлично</div><div class="n5">${[1,2,3,4,5].map(i=>`<button class="${g.sk==i?'a':''}" onclick="lg('${k}','sk',${g.sk==i?0:i},1)">${i}</button>`).join('')}</div><div class="row" style="margin:10px 0"><span class="mu">Сон, часов</span><input type="number" step="0.5" min="0" max="14" style="width:80px" value="${g.sl||''}" onchange="lg('${k}','sl',+this.value)"></div><textarea placeholder="Заметка: что ели, как самочувствие, что новое" oninput="lg('${k}','nt',this.value)">${esc(g.nt)}</textarea></div>
+ <h2>Стресс сегодня</h2><div class="c">${stressUI(k)}<div class="row sp" style="margin-top:10px"><span>${advice(fon(k))}</span><button class="s p" onclick="breathe()">Дыхание</button></div></div>`;return h}
+function dayView(k){const T=tasks(new Date(k+'T00:00')),c=ck(k),s=S.stress[k]||{},g=S.log[k]||{},f=fon(k),done=T.filter(t=>c[t.id]),p=pct(k);
+ const row=(t,on)=>`<div class="t ${on?'on':'no'}" onclick="tog('${k}','${t.id}')"><div class="bx">${on?'✓':''}</div><div class="tt">${t.t}</div></div>`;
+ let h=`<h2>${fd(k)}</h2><div class="ch">${T.length?`<span>Дела ${done.length} из ${T.length}</span>`:''}<span>Вода ${S.water[k]||0} из ${S.goal}</span><span>Стресс ${f?f.toFixed(1).replace('.',','):'не отмечен'}</span><span>Кожа ${g.sk?g.sk+' из 5':'—'}</span><span>Сон ${g.sl?g.sl+' ч':'—'}</span></div>`;
+ h+=`<div class="c"><b>Уровень стресса</b><div class="row sp" style="margin-top:6px">${[['m','Утро'],['d','День'],['e','Вечер']].map(([a,l])=>`<span class="mu">${l}: <b style="color:${s[a]?sc(s[a]):'inherit'}">${s[a]||'—'}</b></span>`).join('')}<span class="mu">Фон: <b style="color:${f?sc(f):'inherit'}">${f?f.toFixed(1).replace('.',','):'—'}</b></span></div></div>`;
+ if(T.length){h+=`<div class="c"><b>Сделано</b>${done.length?done.map(t=>row(t,1)).join(''):'<div class="mu" style="margin-top:6px">Ничего не отмечено</div>'}</div>`;const m=T.filter(t=>!c[t.id]);if(m.length&&k<=ymd(new Date()))h+=`<div class="c"><b>Не сделано</b>${m.map(t=>row(t,0)).join('')}</div>`}
+ else h+='<div class="c mu">До старта программы.</div>';
+ if(g.nt)h+=`<div class="c"><b>Заметка</b><div style="margin-top:6px">${esc(g.nt)}</div></div>`;return h}
+function tCal(){const y=cm.getFullYear(),m=cm.getMonth(),n=new Date(y,m+1,0).getDate(),off=(new Date(y,m,1).getDay()+6)%7;
+ let h=`<div class="row sp"><button onclick="cm.setMonth(cm.getMonth()-1);R()">‹</button><b>${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][m]} ${y}</b><button onclick="cm.setMonth(cm.getMonth()+1);R()">›</button></div><div class="cal" style="margin-top:10px">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x=>`<div class="h">${x}</div>`).join('')}${'<span></span>'.repeat(off)}`;
+ for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d)),p=pct(k),f=fon(k);h+=`<div class="${k==sel?'sel':''}" style="${p>=0?`background:linear-gradient(135deg,rgba(94,240,208,${.08+p*.5}),rgba(139,123,255,${.08+p*.4}))`:''}" onclick="sel='${k}';R()">${d}${f?`<i style="background:${sc(f)}"></i>`:''}</div>`}
+ return h+'</div><div class="mu" style="margin-top:6px">Яркость: сколько дел сделано. Точка: фон стресса, от зелёного до красного.</div>'+dayView(sel)}
+function tStress(){const k=ymd(new Date());let h=`<h1>Стресс</h1><div class="c">${stressUI(k)}<div class="row sp" style="margin-top:10px"><span>${advice(fon(k))}</span><button class="s p" onclick="breathe()">Дыхание</button></div></div><h2>Последние 14 дней</h2><div class="c"><div class="cols">`;const arr=[];
+ for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const f=fon(ymd(d));arr.push(f);h+=`<div style="height:${f/5*100}%;${f?`background:${sc(f)}`:'opacity:.2'}"></div>`}
+ const ok=arr.filter(x=>x),av=ok.length?ok.reduce((a,b)=>a+b)/ok.length:0;
+ return h+`</div><div class="mu" style="margin-top:6px">Средний фон: ${av?av.toFixed(1).replace('.',','):'нет данных'}</div></div><div class="c mu">Что помогает: сон 7–8 часов, вода, зарядка и растяжка, прогулка, меньше экрана перед сном.</div>`}
+const pr=p=>{const x=(S.inv[p.id]||{}).price;return x!=null?x:(p.pr||0)};
+const rub=n=>Math.round(n).toLocaleString('ru-RU')+' ₽',f1=n=>(Math.round(n*10)/10).toLocaleString('ru-RU'),dAdd=n=>{const d=new Date();d.setDate(d.getDate()+Math.floor(n));return ymd(d)};
+const num=q=>parseFloat((prompt(q)||'').replace(',','.')),gi=id=>S.inv[id]=S.inv[id]||{used:0};
+function calc(p){const i=S.inv[p.id]||{},tot=p.v+(i.add||0),rem=Math.max(0,tot-(i.used||0)),rate=p.d*p.w/7,need=rate*365,sh=need-rem,k=Math.max(0,Math.ceil(sh/p.v)),price=pr(p);return{i,tot,rem,rate,left:rem/rate,need,sh,k,price,yr:need/p.v*price,buy:k*price}}
+function addStock(id){const v=num('Сколько докупили? (мл или г)');if(v>0){const i=gi(id);i.add=(i.add||0)+v;(i.log=i.log||[]).push({d:ymd(new Date()),v});sv();R()}}
+function spend(id){const v=num('Сколько списать? (мл или г)');if(v>0){const i=gi(id);i.used+=v;i.tot=(i.tot||0)+v;sv();R()}}
+function setPrice(id){const v=num('Цена упаковки, ₽');if(v>=0){gi(id).price=v;sv();R()}}
+function addCustom(){const n=prompt('Название средства');if(!n)return;const v=num('Объём упаковки, мл или г'),d=num('Сколько уходит за раз, мл или г'),w=num('Сколько раз в неделю'),c=num('Цена упаковки, ₽ (0 если не знаете)');if(v>0&&d>0&&w>0){S.custom.push({id:'c'+Date.now(),n,v,d,w,pr:c||0,c:1});sv();R()}}
+function delC(id){if(confirm('Удалить средство?')){S.custom=S.custom.filter(x=>x.id!=id);delete S.inv[id];det=null;sv();R()}}
+function tDet(id){const p=allP().find(x=>x.id==id);if(!p){det=null;return tInv()}const c=calc(p),i=c.i,rw=(a,b)=>`<div class="row sp" style="padding:5px 0;border-bottom:1px solid var(--gb)"><span class="mu">${a}</span><b>${b}</b></div>`;
+ return `<button onclick="det=null;R()">‹ Назад</button><h1 style="margin-top:12px">${p.n}</h1><h2>Расход</h2><div class="c">${rw('За раз',f1(p.d)+' мл/г')}${rw('В неделю',f1(p.d*p.w)+' мл/г ('+p.w+' раз)')}${rw('В месяц',f1(c.rate*30.4)+' мл/г')}${rw('В год',f1(c.need)+' мл/г')}</div>
+ <h2>Деньги</h2><div class="c">${rw('Упаковка '+p.v+' мл/г',c.price?rub(c.price):'не указана')}${rw('Одно применение',c.price?(Math.round(p.d/p.v*c.price*100)/100)+' ₽':'—')}${rw('В месяц',c.price?rub(c.yr/12):'—')}${rw('В год по расходу',c.price?rub(c.yr):'—')}${rw('Докупить за год',c.k?c.k+' уп., '+(c.price?rub(c.buy):'—'):'не нужно')}<button class="s" style="margin-top:8px" onclick="setPrice('${p.id}')">Изменить цену</button></div>
+ <h2>Запас</h2><div class="c">${rw('Осталось',f1(c.rem)+' из '+f1(c.tot))}${rw('Хватит',Math.floor(c.left)+' дн.')}${rw('Закончится',dAdd(c.left))}${rw('Докупить до',dAdd(Math.max(0,c.left-7)))}${rw('Упаковка хватает',Math.floor(p.v/c.rate)+' дн.')}${rw('Упаковок в год',f1(c.need/p.v))}</div>
+ <h2>Факт</h2><div class="c">${rw('Израсходовано всего',f1(i.tot||0))}${rw('Докуплено',f1(i.add||0))}${(i.log||[]).slice(-8).map(l=>rw(l.d,'+'+f1(l.v))).join('')}</div>
+ <div class="row"><button class="p" onclick="addStock('${p.id}')">+ Докупил</button><button onclick="spend('${p.id}')">Списать</button>${p.c?`<button onclick="delC('${p.id}')">Удалить</button>`:''}</div>`}
+function tInv(){if(det)return tDet(det);const L=allP().map(p=>({p,c:calc(p)})),ym=L.reduce((a,x)=>a+x.c.yr/12,0),yy=L.reduce((a,x)=>a+x.c.yr,0),by=L.reduce((a,x)=>a+x.c.buy,0);
+ let h=`<h1>Запасы</h1><div class="c"><div class="row sp"><span class="mu">Уход в месяц</span><b>${rub(ym)}</b></div><div class="row sp"><span class="mu">В год</span><b>${rub(yy)}</b></div><div class="row sp"><span class="mu">Докупить за год</span><b>${rub(by)}</b></div></div>`;
+ L.forEach(({p,c})=>{h+=`<div class="c"><div class="row sp"><b>${p.n}</b><button class="s" onclick="det='${p.id}';R();scrollTo(0,0)">Отчёт</button></div><div class="bar"><i style="width:${Math.min(100,c.rem/c.tot*100)}%"></i></div><div class="mu">Осталось ${f1(c.rem)} из ${f1(c.tot)}. Хватит ~${Math.floor(c.left)} дн., до ${dAdd(c.left)}.</div><div class="mu">В месяц ${f1(c.rate*30.4)}${c.price?', '+rub(c.yr/12)+'; в год '+rub(c.yr):''}</div>${c.sh>0?`<div class="w" style="font-size:13px">На год не хватает ~${Math.ceil(c.sh)} (${c.k} уп.)</div>`:'<div class="mu">Хватает на год</div>'}<div class="row" style="margin-top:8px"><button class="s p" onclick="addStock('${p.id}')">+ Докупил</button><button class="s" onclick="spend('${p.id}')">Списать</button><button class="s" onclick="{const o=S.inv['${p.id}']||{};S.inv['${p.id}']={used:0,add:0,price:o.price,tot:o.tot,log:o.log};sv();R()}">Новая</button>${p.c?`<button class="s" onclick="use('${p.id}',1);sv();R()">Использовал</button>`:''}</div></div>`});
+ return h+'<button class="p" onclick="addCustom()">+ Добавить своё средство</button>'}
+function tWeek(){const D=[],W=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],av=a=>{a=a.filter(x=>x>0);return a.length?a.reduce((x,y)=>x+y)/a.length:0},n1=x=>x?f1(x):'—';
+ for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=ymd(d),g=S.log[k]||{};D.push({k,l:W[d.getDay()],p:Math.max(0,pct(k)),w:S.water[k]||0,f:fon(k),sk:g.sk||0,sl:g.sl||0})}
+ let pv=0;for(let i=13;i>=7;i--){const d=new Date();d.setDate(d.getDate()-i);pv+=Math.max(0,pct(ymd(d)))}pv/=7;const ap=av(D.map(x=>x.p))*1,dl=Math.round((ap-pv)*100),best=D.slice().sort((a,b)=>b.p-a.p)[0];
+ return `<div class="c"><div class="cols">${D.map(x=>`<div style="height:${Math.max(3,x.p*100)}%"></div>`).join('')}</div><div class="row sp mu" style="margin-top:4px">${D.map(x=>`<span>${x.l}</span>`).join('')}</div></div>
+ <div class="ch"><span>Выполнение ${Math.round(ap*100)}%${pv?` (${dl>=0?'+':''}${dl}% к прошлой неделе)`:''}</span><span>Вода в среднем ${n1(av(D.map(x=>x.w)))}</span><span>Стресс ${n1(av(D.map(x=>x.f)))}</span><span>Кожа ${n1(av(D.map(x=>x.sk)))}</span><span>Сон ${n1(av(D.map(x=>x.sl)))} ч</span></div>
+ <div class="c mu" style="margin-top:10px">Лучший день: ${best.p>0?fd(best.k)+', '+Math.round(best.p*100)+'%':'пока нет данных'}. ${av(D.map(x=>x.f))>=3?'Стресс высокий, добавьте дыхание и прогулки.':'Продолжайте в том же духе.'}</div>`}
+function tAch(){const X=xp(),L=lv(X);return `<div class="hero"><b>Уровень ${L}</b><div class="mu">${X} очков. Дело 10, стакан воды 2, отметка стресса 5, итог дня 15.</div></div>`+ach().map(([n,d,o])=>`<div class="c ${o?'':'lk'}"><div class="row sp"><b>${o?'★ ':''}${n}</b><span class="mu">${d}</span></div></div>`).join('')}
+const rn=r=>r.k=='task'?'Дела: '+SL[r.s]:r.k=='water'?'Вода':r.k=='stress'?'Стресс: '+{m:'утро',d:'день',e:'вечер'}[r.s]:(r.x||'Напоминание');
+function fire(r,test){const k=ymd(new Date()),c=ck(k);let b=r.x||'Время для ухода';
+ if(r.k=='task'){const T=tasks(new Date()).filter(t=>t.s==r.s&&!c[t.id]);if(!T.length&&!test)return;b=SL[r.s]+(T.length?': осталось '+T.length+'. '+T.slice(0,3).map(t=>t.t.split(',')[0]).join('; '):': всё сделано')}
+ if(r.k=='water'){const n=S.water[k]||0;if(n>=S.goal&&!test)return;b='Воды '+n+' из '+S.goal+'. Выпейте стакан'}
+ if(r.k=='stress'){const s=S.stress[k]||{};if(s[r.s]&&!test)return;b='Отметьте уровень стресса'}
+ const o={body:b,icon:'icon-192.png',badge:'icon-192.png',tag:r.id,vibrate:[80,40,80]};
+ if('serviceWorker' in navigator)navigator.serviceWorker.ready.then(g=>g.showNotification('Glow',o)).catch(()=>{try{new Notification('Glow',o)}catch(e){}});else try{new Notification('Glow',o)}catch(e){}}
+function tick(){if(!window.Notification||Notification.permission!='granted')return;const d=new Date(),k=ymd(d),now=d.getHours()*60+d.getMinutes();if(S.fired.d!=k)S.fired={d:k};
+ S.rem.forEach(r=>{if(!r.on)return;const[h,m]=r.t.split(':').map(Number),t=h*60+m;if(now>=t&&now<t+30&&!S.fired[r.id]){S.fired[r.id]=1;sv();fire(r)}})}
+setInterval(tick,20000);document.addEventListener('visibilitychange',tick);
+function askN(){if(!window.Notification)return alert('Этот браузер не поддерживает уведомления');Notification.requestPermission().then(()=>R())}
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click()}
+function ics(){const p=n=>String(n).padStart(2,'0'),d=new Date(),ds=''+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());let o='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Glow//RU\r\n';
+ S.rem.filter(r=>r.on).forEach(r=>{const n=rn(r);o+='BEGIN:VEVENT\r\nUID:glow-'+r.id+'@glow\r\nDTSTAMP:'+ds+'T000000Z\r\nDTSTART:'+ds+'T'+r.t.replace(':','')+'00\r\nDURATION:PT10M\r\nRRULE:FREQ=DAILY\r\nSUMMARY:Glow: '+n+'\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:'+n+'\r\nTRIGGER:PT0M\r\nEND:VALARM\r\nEND:VEVENT\r\n'});dl('glow-reminders.ics',o+'END:VCALENDAR','text/calendar')}
+function addRem(){const t=$('#rt').value,x=$('#rx').value.trim();if(!t||!x)return;S.rem.push({id:'r'+Date.now(),t,k:'text',x,on:1});sv();R()}
+function tRem(){const np=window.Notification?Notification.permission:'none';
+ return `<div class="c"><b>Уведомления: ${np=='granted'?'включены':np=='denied'?'запрещены в настройках браузера':np=='none'?'не поддерживаются':'выключены'}</b><div class="mu" style="margin:6px 0">Приложение напоминает, пока оно открыто или недавно было в фоне. Чтобы напоминания приходили всегда, даже когда приложение закрыто, выгрузите их в календарь телефона.</div><div class="row">${np=='default'?'<button class="p" onclick="askN()">Включить</button>':''}<button onclick="fire(S.rem[0],1)">Проверить</button><button class="p" onclick="ics()">В календарь телефона</button></div></div>
+ ${S.rem.map((r,i)=>`<div class="c row sp"><div class="row"><input type="time" value="${r.t}" onchange="S.rem[${i}].t=this.value;sv()"><span>${esc(rn(r))}</span></div><div class="row"><input type="checkbox" ${r.on?'checked':''} onchange="S.rem[${i}].on=this.checked?1:0;sv()"><button class="s" onclick="S.rem.splice(${i},1);sv();R()">×</button></div></div>`).join('')}
+ <div class="c"><b>Своё напоминание</b><div class="row" style="margin-top:8px"><input type="time" id="rt" value="12:00"><input id="rx" placeholder="Текст" style="flex:1;min-width:120px"><button class="p" onclick="addRem()">Добавить</button></div></div>`}
+function exp(){dl('glow-'+ymd(new Date())+'.json',JSON.stringify(S),'application/json')}
+function cp(){navigator.clipboard.writeText(JSON.stringify(S)).then(()=>alert('Скопировано')).catch(()=>{$('#ta').value=JSON.stringify(S)})}
+function load(t){try{const j=JSON.parse(t);if(!j.start||!j.checks)throw 0;S=Object.assign(D0(),j);sv();R();alert('Данные загружены')}catch(e){alert('Не удалось прочитать файл')}}
+function imp(f){if(f){const r=new FileReader();r.onload=()=>load(r.result);r.readAsText(f)}}
+const tData=()=>`<div class="c"><div class="mu" style="margin-bottom:8px">Всё хранится на телефоне. Выгрузите файл и откройте его на другом телефоне.</div><div class="row"><button class="p" onclick="exp()">Выгрузить файл</button><button onclick="cp()">Копировать текстом</button></div><h2>Загрузить</h2><input type="file" accept=".json" onchange="imp(this.files[0])"><textarea id="ta" placeholder="Или вставьте текст выгрузки" style="margin-top:8px"></textarea><button onclick="load($('#ta').value)" style="margin-top:6px">Загрузить из текста</button></div>
+ <div class="c"><label>Старт программы <input type="date" value="${S.start}" onchange="S.start=this.value;sv()"></label><br><br><label>Отбой <input type="time" value="${S.sleep}" onchange="S.sleep=this.value;sv()"></label> <label>Подъём <input type="time" value="${S.wake}" onchange="S.wake=this.value;sv()"></label><br><br><label>Цель воды, стаканов <input type="number" min="4" max="14" value="${S.goal}" style="width:70px" onchange="S.goal=+this.value;sv()"></label></div><button onclick="if(confirm('Стереть все данные?')){S=D0();sv();R()}">Сбросить всё</button>`;
+function tMore(){return `<h1>Ещё</h1><div class="tabs">${[['w','Неделя'],['a','Достижения'],['n','Напоминания'],['d','Данные']].map(([k,l])=>`<button class="${k==sub?'a':''}" onclick="sub='${k}';R()">${l}</button>`).join('')}</div>`+{w:tWeek,a:tAch,n:tRem,d:tData}[sub]()}
+function R(){const x=window.scrollY;$('#v').innerHTML={t:tToday,c:tCal,s:tStress,i:tInv,m:tMore}[tab]();
+ $('#nav').innerHTML=[['t','◉','Сегодня'],['c','▦','Календарь'],['s','≈','Стресс'],['i','▤','Запасы'],['m','⋯','Ещё']].map(([k,i,l])=>`<button class="${k==tab?'a':''}" onclick="tab='${k}';det=null;R();scrollTo(0,0)"><b>${i}</b>${l}</button>`).join('');scrollTo(0,x)}
+R();tick();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
