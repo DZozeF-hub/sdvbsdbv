@@ -33,6 +33,7 @@ button.p{background:linear-gradient(135deg,var(--a),var(--b));color:#0a0c1c;bord
 .w{color:var(--w)}textarea{width:100%;height:64px}.lk{opacity:.35}
 #br{position:fixed;inset:0;background:rgba(10,12,28,.97);z-index:9;display:flex;flex-direction:column;gap:40px;align-items:center;justify-content:center}
 .bc{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b))}
+#fm{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8;display:flex;align-items:flex-end}#fm>div{background:#15183d;width:100%;max-width:560px;margin:0 auto;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}#fm input{width:100%}#fm input[type=checkbox]{width:20px}label.f{display:block;margin:8px 0 3px}.ch span{cursor:default}
 </style></head><body><div id="v"></div><div class="nav" id="nav"></div>
 <script>
 const K='glow1',$=s=>document.querySelector(s);
@@ -41,7 +42,7 @@ const MN=['января','февраля','марта','апреля','мая','
 const fd=k=>{const d=new Date(k+'T00:00');return d.getDate()+' '+MN[d.getMonth()]};
 const esc=t=>String(t||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const DR=()=>[{id:'r1',t:'07:30',k:'task',s:0,on:1},{id:'r2',t:'09:30',k:'stress',s:'m',on:1},{id:'r3',t:'12:30',k:'task',s:1,on:1},{id:'r4',t:'13:00',k:'water',on:1},{id:'r5',t:'15:00',k:'stress',s:'d',on:1},{id:'r6',t:'17:00',k:'water',on:1},{id:'r7',t:'20:00',k:'stress',s:'e',on:1},{id:'r8',t:'21:30',k:'task',s:2,on:1},{id:'r9',t:'22:30',k:'text',x:'Экран убрать, скоро спать',on:1}];
-const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],rem:DR(),fired:{}});
+const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],ov:{},buys:[],ul:{},rem:DR(),fired:{}});
 let S;try{S=Object.assign(D0(),JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){S=D0()}
 const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
 const P=[{id:'sh',pr:748,n:'Шампунь VOIS',v:1000,d:6,w:3},{id:'co',pr:881,n:'Кондиционер VOIS',v:1000,d:8,w:3},{id:'oil',pr:763,n:'Аргановое масло',v:100,d:.1,w:3},{id:'spf',pr:369,n:'SPF 50+',v:50,d:1,w:7},{id:'nia',pr:350,n:'Ниацинамид 10%',v:30,d:.2,w:7},{id:'vc',pr:314,n:'Витамин C 5%',v:30,d:.3,w:7},{id:'cr',pr:271,n:'Крем с гиалуроном',v:50,d:.6,w:7},{id:'hand',pr:953,n:'Крем для рук',v:550,d:1,w:7}];
@@ -71,10 +72,10 @@ function tasks(dt){
  a(3,'sl','Лечь в '+S.sleep+', экран убрать за 30 минут');
  return T}
 const ck=k=>S.checks[k]||{};
-const allP=()=>P.concat(S.custom||[]);
-function use(p,s){const i=S.inv[p]=S.inv[p]||{used:0},d=allP().find(x=>x.id==p).d;i.used=Math.max(0,i.used+s*d);i.tot=Math.max(0,(i.tot||0)+s*d)}
+const allP=()=>P.concat(S.custom||[]).map(p=>Object.assign({},p,(S.ov||{})[p.id]));
+function use(p,s,k){const i=S.inv[p]=S.inv[p]||{used:0},d=allP().find(x=>x.id==p).d;i.used=Math.max(0,i.used+s*d);i.tot=Math.max(0,(i.tot||0)+s*d);k=k||ymd(new Date());const u=(S.ul=S.ul||{})[k]=S.ul[k]||{};u[p]=Math.max(0,(u[p]||0)+s*d)}
 function tog(k,id){const c=S.checks[k]=S.checks[k]||{},t=tasks(new Date(k+'T00:00')).find(x=>x.id==id);
- if(c[id]){delete c[id];t&&t.p&&use(t.p,-1)}else{c[id]=1;t&&t.p&&use(t.p,1)}sv();R()}
+ if(c[id]){delete c[id];t&&t.p&&use(t.p,-1,k)}else{c[id]=1;t&&t.p&&use(t.p,1,k)}sv();R()}
 const pct=k=>{const T=tasks(new Date(k+'T00:00'));return T.length?T.filter(t=>ck(k)[t.id]).length/T.length:-1};
 const fon=k=>{const s=S.stress[k]||{},v=[s.m,s.d,s.e].filter(x=>x);return v.length?v.reduce((a,b)=>a+b)/v.length:0};
 function setSt(k,sl,v){const s=S.stress[k]=S.stress[k]||{};s[sl]=s[sl]==v?0:v;sv();R()}
@@ -122,21 +123,58 @@ const pr=p=>{const x=(S.inv[p.id]||{}).price;return x!=null?x:(p.pr||0)};
 const rub=n=>Math.round(n).toLocaleString('ru-RU')+' ₽',f1=n=>(Math.round(n*10)/10).toLocaleString('ru-RU'),dAdd=n=>{const d=new Date();d.setDate(d.getDate()+Math.floor(n));return ymd(d)};
 const num=q=>parseFloat((prompt(q)||'').replace(',','.')),gi=id=>S.inv[id]=S.inv[id]||{used:0};
 function calc(p){const i=S.inv[p.id]||{},tot=p.v+(i.add||0),rem=Math.max(0,tot-(i.used||0)),rate=p.d*p.w/7,need=rate*365,sh=need-rem,k=Math.max(0,Math.ceil(sh/p.v)),price=pr(p);return{i,tot,rem,rate,left:rem/rate,need,sh,k,price,yr:need/p.v*price,buy:k*price}}
-function addStock(id){const v=num('Сколько докупили? (мл или г)');if(v>0){const i=gi(id);i.add=(i.add||0)+v;(i.log=i.log||[]).push({d:ymd(new Date()),v});sv();R()}}
 function spend(id){const v=num('Сколько списать? (мл или г)');if(v>0){const i=gi(id);i.used+=v;i.tot=(i.tot||0)+v;sv();R()}}
 function setPrice(id){const v=num('Цена упаковки, ₽');if(v>=0){gi(id).price=v;sv();R()}}
-function addCustom(){const n=prompt('Название средства');if(!n)return;const v=num('Объём упаковки, мл или г'),d=num('Сколько уходит за раз, мл или г'),w=num('Сколько раз в неделю'),c=num('Цена упаковки, ₽ (0 если не знаете)');if(v>0&&d>0&&w>0){S.custom.push({id:'c'+Date.now(),n,v,d,w,pr:c||0,c:1});sv();R()}}
 function delC(id){if(confirm('Удалить средство?')){S.custom=S.custom.filter(x=>x.id!=id);delete S.inv[id];det=null;sv();R()}}
 function tDet(id){const p=allP().find(x=>x.id==id);if(!p){det=null;return tInv()}const c=calc(p),i=c.i,rw=(a,b)=>`<div class="row sp" style="padding:5px 0;border-bottom:1px solid var(--gb)"><span class="mu">${a}</span><b>${b}</b></div>`;
  return `<button onclick="det=null;R()">‹ Назад</button><h1 style="margin-top:12px">${p.n}</h1><h2>Расход</h2><div class="c">${rw('За раз',f1(p.d)+' мл/г')}${rw('В неделю',f1(p.d*p.w)+' мл/г ('+p.w+' раз)')}${rw('В месяц',f1(c.rate*30.4)+' мл/г')}${rw('В год',f1(c.need)+' мл/г')}</div>
  <h2>Деньги</h2><div class="c">${rw('Упаковка '+p.v+' мл/г',c.price?rub(c.price):'не указана')}${rw('Одно применение',c.price?(Math.round(p.d/p.v*c.price*100)/100)+' ₽':'—')}${rw('В месяц',c.price?rub(c.yr/12):'—')}${rw('В год по расходу',c.price?rub(c.yr):'—')}${rw('Докупить за год',c.k?c.k+' уп., '+(c.price?rub(c.buy):'—'):'не нужно')}<button class="s" style="margin-top:8px" onclick="setPrice('${p.id}')">Изменить цену</button></div>
  <h2>Запас</h2><div class="c">${rw('Осталось',f1(c.rem)+' из '+f1(c.tot))}${rw('Хватит',Math.floor(c.left)+' дн.')}${rw('Закончится',dAdd(c.left))}${rw('Докупить до',dAdd(Math.max(0,c.left-7)))}${rw('Упаковка хватает',Math.floor(p.v/c.rate)+' дн.')}${rw('Упаковок в год',f1(c.need/p.v))}</div>
  <h2>Факт</h2><div class="c">${rw('Израсходовано всего',f1(i.tot||0))}${rw('Докуплено',f1(i.add||0))}${(i.log||[]).slice(-8).map(l=>rw(l.d,'+'+f1(l.v))).join('')}</div>
- <div class="row"><button class="p" onclick="addStock('${p.id}')">+ Докупил</button><button onclick="spend('${p.id}')">Списать</button>${p.c?`<button onclick="delC('${p.id}')">Удалить</button>`:''}</div>`}
-function tInv(){if(det)return tDet(det);const L=allP().map(p=>({p,c:calc(p)})),ym=L.reduce((a,x)=>a+x.c.yr/12,0),yy=L.reduce((a,x)=>a+x.c.yr,0),by=L.reduce((a,x)=>a+x.c.buy,0);
- let h=`<h1>Запасы</h1><div class="c"><div class="row sp"><span class="mu">Уход в месяц</span><b>${rub(ym)}</b></div><div class="row sp"><span class="mu">В год</span><b>${rub(yy)}</b></div><div class="row sp"><span class="mu">Докупить за год</span><b>${rub(by)}</b></div></div>`;
- L.forEach(({p,c})=>{h+=`<div class="c"><div class="row sp"><b>${p.n}</b><button class="s" onclick="det='${p.id}';R();scrollTo(0,0)">Отчёт</button></div><div class="bar"><i style="width:${Math.min(100,c.rem/c.tot*100)}%"></i></div><div class="mu">Осталось ${f1(c.rem)} из ${f1(c.tot)}. Хватит ~${Math.floor(c.left)} дн., до ${dAdd(c.left)}.</div><div class="mu">В месяц ${f1(c.rate*30.4)}${c.price?', '+rub(c.yr/12)+'; в год '+rub(c.yr):''}</div>${c.sh>0?`<div class="w" style="font-size:13px">На год не хватает ~${Math.ceil(c.sh)} (${c.k} уп.)</div>`:'<div class="mu">Хватает на год</div>'}<div class="row" style="margin-top:8px"><button class="s p" onclick="addStock('${p.id}')">+ Докупил</button><button class="s" onclick="spend('${p.id}')">Списать</button><button class="s" onclick="{const o=S.inv['${p.id}']||{};S.inv['${p.id}']={used:0,add:0,price:o.price,tot:o.tot,log:o.log};sv();R()}">Новая</button>${p.c?`<button class="s" onclick="use('${p.id}',1);sv();R()">Использовал</button>`:''}</div></div>`});
- return h+'<button class="p" onclick="addCustom()">+ Добавить своё средство</button>'}
+ <div class="row"><button class="p" onclick="bForm('${p.id}')">+ Докупил</button><button onclick="spend('${p.id}')">Списать</button><button onclick="pForm('${p.id}')">Изменить</button>${p.c?`<button onclick="delC('${p.id}')">Удалить</button>`:''}</div>`}
+function tInv(){if(det)return tDet(det);if(isub=='s')return `<div class="row sp"><h1>Статистика</h1><button class="p" onclick="pForm()">+ Добавить</button></div>${seg()}`+tStat();const L=allP().map(p=>({p,c:calc(p)})),ym=L.reduce((a,x)=>a+x.c.yr/12,0),yy=L.reduce((a,x)=>a+x.c.yr,0),by=L.reduce((a,x)=>a+x.c.buy,0);
+ let h=`<div class="row sp"><h1>Запасы</h1><button class="p" onclick="pForm()">+ Добавить</button></div>${seg()}<div class="c"><div class="row sp"><span class="mu">Уход в месяц</span><b>${rub(ym)}</b></div><div class="row sp"><span class="mu">В год</span><b>${rub(yy)}</b></div><div class="row sp"><span class="mu">Докупить за год</span><b>${rub(by)}</b></div></div>`;
+ L.forEach(({p,c})=>{h+=`<div class="c"><div class="row sp"><b>${p.n}</b><button class="s" onclick="det='${p.id}';R();scrollTo(0,0)">Отчёт</button></div><div class="bar"><i style="width:${Math.min(100,c.rem/c.tot*100)}%"></i></div><div class="mu">Осталось ${f1(c.rem)} из ${f1(c.tot)}. Хватит ~${Math.floor(c.left)} дн., до ${dAdd(c.left)}.</div><div class="mu">В месяц ${f1(c.rate*30.4)}${c.price?', '+rub(c.yr/12)+'; в год '+rub(c.yr):''}</div>${c.sh>0?`<div class="w" style="font-size:13px">На год не хватает ~${Math.ceil(c.sh)} (${c.k} уп.)</div>`:'<div class="mu">Хватает на год</div>'}<div class="row" style="margin-top:8px"><button class="s p" onclick="bForm('${p.id}')">+ Докупил</button><button class="s" onclick="spend('${p.id}')">Списать</button><button class="s" onclick="{const o=S.inv['${p.id}']||{};S.inv['${p.id}']={used:0,add:0,price:o.price,tot:o.tot,log:o.log};sv();R()}">Новая</button>${p.c?`<button class="s" onclick="use('${p.id}',1);sv();R()">Использовал</button>`:''}</div></div>`});
+ return h}
+let isub='l',usp=null;
+const MS=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const TPL=[['Шампунь',250,6,3],['Крем',50,.6,7],['Сыворотка',30,.3,7],['Масло',100,.1,3],['SPF',50,1,7],['Маска',200,10,1]];
+const FQ=[['Каждый день',7],['Через день',3.5],['3 раза',3],['2 раза',2],['1 раз',1]];
+const seg=()=>`<div class="tabs">${[['l','Средства'],['s','Статистика']].map(([k,l])=>`<button class="${k==isub?'a':''}" onclick="isub='${k}';R()">${l}</button>`).join('')}</div>`;
+const fv=i=>parseFloat(($('#'+i).value||'').replace(',','.'))||0;
+function sheet(t,b,ok){const o=document.createElement('div');o.id='fm';o.innerHTML=`<div><div class="row sp"><h1 style="font-size:20px">${t}</h1><button class="s" onclick="$('#fm').remove()">✕</button></div>${b}<button class="p" style="width:100%;margin-top:14px" id="fok">Сохранить</button></div>`;document.body.appendChild(o);$('#fok').onclick=()=>{if(ok()!==false)o.remove()}}
+function fPrev(){const v=fv('fv'),d=fv('fd'),w=fv('fw'),p=fv('fp'),e=$('#fpv');if(!e)return;e.innerHTML=v>0&&d>0&&w>0?`Упаковки хватит на ~<b>${Math.floor(v/(d*w/7))} дн.</b>${p?`<br>Одно применение: <b>${(p*d/v).toFixed(1)} ₽</b>, в месяц: <b>${rub(p*d*w/7*30.4/v)}</b>`:''}`:'Заполните объём, расход и частоту, и здесь появится расчёт'}
+function tpl(i){const t=TPL[i];if(!$('#fn').value)$('#fn').value=t[0];$('#fv').value=t[1];$('#fd').value=t[2];$('#fw').value=t[3];fPrev()}
+function pForm(id){const p=id&&allP().find(x=>x.id==id)||{},pc=id?pr(p):'';
+ sheet(id?'Изменить средство':'Новое средство',`${id?'':`<div class="mu">Шаблон (потом можно поправить):</div><div class="ch" style="margin:6px 0">${TPL.map((t,i)=>`<span onclick="tpl(${i})" style="cursor:pointer">${t[0]}</span>`).join('')}</div>`}
+ <label class="f mu">Название</label><input id="fn" value="${esc(p.n)}" placeholder="Например, Крем для лица">
+ <div class="row" style="margin-top:8px"><div style="flex:1"><label class="f mu">Объём упаковки, мл/г</label><input id="fv" inputmode="decimal" value="${p.v||''}" oninput="fPrev()"></div><div style="flex:1"><label class="f mu">Цена, ₽</label><input id="fp" inputmode="decimal" value="${pc||''}" oninput="fPrev()"></div></div>
+ <label class="f mu">Сколько уходит за раз, мл/г</label><input id="fd" inputmode="decimal" value="${p.d||''}" oninput="fPrev()">
+ <label class="f mu">Сколько раз в неделю</label><input id="fw" inputmode="decimal" value="${p.w||''}" oninput="fPrev()"><div class="ch" style="margin-top:6px">${FQ.map(f=>`<span onclick="$('#fw').value=${f[1]};fPrev()" style="cursor:pointer">${f[0]}</span>`).join('')}</div>
+ ${id?'':'<label class="row" style="margin-top:10px"><input type="checkbox" id="fb" checked style="width:20px;height:20px"> Куплено сегодня (добавить в расходы)</label>'}
+ <div class="c mu" id="fpv"></div>`,()=>{const n=$('#fn').value.trim(),v=fv('fv'),d=fv('fd'),w=fv('fw'),pp=fv('fp');if(!n||v<=0||d<=0||w<=0){alert('Заполните название, объём, расход и частоту');return false}
+  if(id){const o={n,v,d,w,pr:pp};if(p.c)Object.assign(S.custom.find(x=>x.id==id),o);else S.ov[id]=o;if(S.inv[id])delete S.inv[id].price}
+  else{const nid='c'+Date.now();S.custom.push({id:nid,n,v,d,w,pr:pp,c:1});if($('#fb').checked&&pp>0)S.buys.push({d:ymd(new Date()),id:nid,n:1,s:Math.round(pp)})}
+  sv();R()});fPrev()}
+function bPrev(id){const p=allP().find(x=>x.id==id),n=fv('bn'),c=fv('bp');$('#bv').innerHTML=`Итого: <b>${rub(n*c)}</b>, в запас +<b>${f1(n*p.v)}</b> мл/г`}
+function bForm(id){const p=allP().find(x=>x.id==id);
+ sheet('Докупил: '+esc(p.n),`<div class="row" style="margin-top:8px"><div style="flex:1"><label class="f mu">Упаковок</label><input id="bn" value="1" inputmode="decimal" oninput="bPrev('${id}')"></div><div style="flex:1"><label class="f mu">Цена за упаковку, ₽</label><input id="bp" value="${pr(p)||''}" inputmode="decimal" oninput="bPrev('${id}')"></div></div>
+ <label class="f mu">Дата покупки (можно прошлую)</label><input id="bd" type="date" value="${ymd(new Date())}">
+ <label class="row" style="margin-top:10px"><input type="checkbox" id="ba" checked style="width:20px;height:20px"> Добавить в запас (${p.v} мл/г в упаковке)</label><div class="c mu" id="bv"></div>`,()=>{const n=fv('bn'),pp=fv('bp'),d=$('#bd').value||ymd(new Date());if(n<=0){alert('Укажите количество упаковок');return false}
+  const i=gi(id);if($('#ba').checked){i.add=(i.add||0)+n*p.v;(i.log=i.log||[]).push({d,v:n*p.v})}if(pp>0)i.price=pp;S.buys.push({d,id,n,s:Math.round(n*pp)});sv();R()});bPrev(id)}
+function delB(i){if(confirm('Удалить запись о покупке? Запас не изменится.')){S.buys.splice(i,1);sv();R()}}
+function colsH(a,l,fmt){const m=Math.max(...a,0);return `<div class="cols">${a.map((v,i)=>`<div title="${fmt?fmt(v):v}" style="height:${m?Math.max(3,v/m*100):3}%${v?'':';opacity:.25'}"></div>`).join('')}</div><div class="row mu" style="font-size:10px;margin-top:3px;gap:0">${l.map(x=>`<span style="flex:1;text-align:center">${x}</span>`).join('')}</div>`}
+function tStat(){const A=allP(),L=A.map(p=>({p,c:calc(p)})),B=S.buys||[],N=new Date(),M=[];for(let i=5;i>=0;i--)M.push(new Date(N.getFullYear(),N.getMonth()-i,1));
+ const ms=M.map(d=>B.filter(b=>b.d.slice(0,7)==ymd(d).slice(0,7)).reduce((a,b)=>a+b.s,0)),tot=B.reduce((a,b)=>a+b.s,0),yr=L.reduce((a,x)=>a+x.c.yr,0),bp=L.filter(x=>x.c.yr>0).sort((a,b)=>b.c.yr-a.c.yr),mx=bp.length?bp[0].c.yr:1;
+ if(!usp||!A.some(p=>p.id==usp))usp=A[0].id;const up=A.find(p=>p.id==usp),D=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);D.push({n:d.getDate(),u:((S.ul||{})[ymd(d)]||{})[usp]||0})}
+ const us=D.reduce((a,x)=>a+x.u,0),pl=up.d*up.w/7,C=[];for(let i=29;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);C.push(Math.max(0,pct(ymd(d)))*100)}
+ const ac=C.reduce((a,b)=>a+b,0)/30;
+ return `<div class="ch"><span>Куплено всего: ${rub(tot)}</span><span>В этом месяце: ${rub(ms[5])}</span><span>Уход в день: ${rub(yr/365)}</span><span>В год по расходу: ${rub(yr)}</span></div>
+ <h2>Покупки по месяцам, ₽</h2><div class="c">${tot?colsH(ms,M.map((d,i)=>MS[d.getMonth()]+'<br>'+Math.round(ms[i])),rub):'<div class="mu">Пока нет покупок. Нажмите «+ Докупил» у средства (можно указать прошлую дату), и здесь появится график.</div>'}</div>
+ <h2>Куда уходят деньги (в год)</h2><div class="c">${bp.map(x=>`<div style="margin:6px 0"><div class="row sp"><span>${esc(x.p.n)}</span><span class="mu">${rub(x.c.yr)} · ${Math.round(x.c.yr/yr*100)}%</span></div><div class="bar" style="margin:3px 0"><i style="width:${x.c.yr/mx*100}%"></i></div></div>`).join('')||'<div class="mu">Укажите цены средств</div>'}</div>
+ <h2>Расход средства за 14 дней</h2><div class="c"><select style="width:100%;margin-bottom:10px" onchange="usp=this.value;R()">${A.map(p=>`<option value="${p.id}" ${p.id==usp?'selected':''}>${esc(p.n)}</option>`).join('')}</select>${colsH(D.map(x=>x.u),D.map(x=>x.n),f1)}<div class="mu" style="margin-top:6px">За 14 дней: ${f1(us)} мл/г, в среднем ${f1(us/14)} в день (по плану ${f1(pl)}). Данные копятся с отметок дел.</div></div>
+ <h2>Выполнение дел за 30 дней, %</h2><div class="c">${colsH(C,C.map((x,i)=>i%5==4?(new Date(Date.now()-(29-i)*864e5)).getDate():''),x=>Math.round(x)+'%')}<div class="mu" style="margin-top:6px">В среднем ${Math.round(ac)}%</div></div>
+ ${B.length?`<h2>История покупок</h2><div class="c">${B.map((b,i)=>({b,i})).reverse().slice(0,10).map(({b,i})=>{const p=A.find(x=>x.id==b.id);return `<div class="row sp" style="padding:5px 0;border-bottom:1px solid var(--gb)"><span><span class="mu">${fd(b.d)}</span> ${p?esc(p.n):'—'}${b.n!=1?' ×'+f1(b.n):''}</span><span>${rub(b.s)} <button class="s" onclick="delB(${i})">×</button></span></div>`}).join('')}</div>`:''}`}
 function tWeek(){const D=[],W=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],av=a=>{a=a.filter(x=>x>0);return a.length?a.reduce((x,y)=>x+y)/a.length:0},n1=x=>x?f1(x):'—';
  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=ymd(d),g=S.log[k]||{};D.push({k,l:W[d.getDay()],p:Math.max(0,pct(k)),w:S.water[k]||0,f:fon(k),sk:g.sk||0,sl:g.sl||0})}
  let pv=0;for(let i=13;i>=7;i--){const d=new Date();d.setDate(d.getDate()-i);pv+=Math.max(0,pct(ymd(d)))}pv/=7;const ap=av(D.map(x=>x.p))*1,dl=Math.round((ap-pv)*100),best=D.slice().sort((a,b)=>b.p-a.p)[0];

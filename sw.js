@@ -1,4 +1,4 @@
-const C = 'glow-v6';
+const C = 'glow-v7';
 const A = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
