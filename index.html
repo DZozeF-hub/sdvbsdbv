@@ -42,9 +42,10 @@ const MN=['января','февраля','марта','апреля','мая','
 const fd=k=>{const d=new Date(k+'T00:00');return d.getDate()+' '+MN[d.getMonth()]};
 const esc=t=>String(t||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const DR=()=>[{id:'r1',t:'07:30',k:'task',s:0,on:1},{id:'r2',t:'09:30',k:'stress',s:'m',on:1},{id:'r3',t:'12:30',k:'task',s:1,on:1},{id:'r4',t:'13:00',k:'water',on:1},{id:'r5',t:'15:00',k:'stress',s:'d',on:1},{id:'r6',t:'17:00',k:'water',on:1},{id:'r7',t:'20:00',k:'stress',s:'e',on:1},{id:'r8',t:'21:30',k:'task',s:2,on:1},{id:'r9',t:'22:30',k:'text',x:'Экран убрать, скоро спать',on:1},{id:'rd3',t:'10:00',k:'text',x:'Витамин D3 с едой',on:1}];
-const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],ov:{},buys:[],ul:{},rem:DR(),fired:{}});
+const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],ov:{},buys:[],ul:{},rem:DR(),fired:{},tm:{},run:null,mg:{s:ymd(new Date()),n:30,per:1,on:1}});
 let S;try{S=Object.assign(D0(),JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){S=D0()}
 if(!S.rem.some(r=>r.id=='rd3'))S.rem.push({id:'rd3',t:'10:00',k:'text',x:'Витамин D3 с едой',on:1});
+if(!S.rem.some(r=>r.id=='rmg'))S.rem.push({id:'rmg',t:'21:00',k:'text',x:'Магний B6 после ужина',on:1});
 const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
 const P=[{id:'sh',pr:757,n:'Шампунь VOIS',v:1000,d:6,w:3},{id:'co',pr:909,n:'Кондиционер VOIS',v:1000,d:8,w:3},{id:'oil',pr:827,n:'Аргановое масло',v:100,d:.1,w:3},{id:'spf',pr:370,n:'SPF 50+',v:50,d:1,w:7},{id:'vc',pr:314,n:'Витамин C 5%',v:30,d:.3,w:7},{id:'hand',pr:960,n:'Крем для рук',v:550,d:1,w:7}];
 const SL=['Утро','День','Вечер','Сон'];
@@ -67,6 +68,7 @@ function tasks(dt){
  a(2,'bha2','Умывалка BHA: смыть SPF, массаж 60 секунд');
  a(2,'hand','Крем для рук','hand');
  a(2,'tb2','Зубы и нить, 2 минуты');
+ {const md=Math.floor((new Date(ymd(dt)+'T00:00')-new Date(S.mg.s+'T00:00'))/864e5);if(S.mg.on&&md>=0&&md<S.mg.n)a(2,'mg','Магний B6 (цитрат): '+S.mg.per+' таб. после ужина, день '+(md+1)+' из '+S.mg.n,null,'1 таб. = 100 мг магния + 2 мг B6. Дозу и длительность курса смотрите на упаковке или у врача')}
  a(2,'st','Растяжка 10 минут: спина, бёдра, шея, грудь');
  if(w==0)a(2,'chk','Проверить запасы во вкладке «Запасы»');
  a(2,'sm','Массаж кожи головы 3–5 минут подушечками пальцев, без ногтей и сильного нажима');
@@ -210,10 +212,35 @@ function cp(){navigator.clipboard.writeText(JSON.stringify(S)).then(()=>alert('�
 function load(t){try{const j=JSON.parse(t);if(!j.start||!j.checks)throw 0;S=Object.assign(D0(),j);sv();R();alert('Данные загружены')}catch(e){alert('Не удалось прочитать файл')}}
 function imp(f){if(f){const r=new FileReader();r.onload=()=>load(r.result);r.readAsText(f)}}
 const tData=()=>`<div class="c"><div class="mu" style="margin-bottom:8px">Всё хранится на телефоне. Выгрузите файл и откройте его на другом телефоне.</div><div class="row"><button class="p" onclick="exp()">Выгрузить файл</button><button onclick="cp()">Копировать текстом</button></div><h2>Загрузить</h2><input type="file" accept=".json" onchange="imp(this.files[0])"><textarea id="ta" placeholder="Или вставьте текст выгрузки" style="margin-top:8px"></textarea><button onclick="load($('#ta').value)" style="margin-top:6px">Загрузить из текста</button></div>
- <div class="c"><label>Старт программы <input type="date" value="${S.start}" onchange="S.start=this.value;sv()"></label><br><br><label>Отбой <input type="time" value="${S.sleep}" onchange="S.sleep=this.value;sv()"></label> <label>Подъём <input type="time" value="${S.wake}" onchange="S.wake=this.value;sv()"></label><br><br><label>Цель воды, стаканов <input type="number" min="4" max="14" value="${S.goal}" style="width:70px" onchange="S.goal=+this.value;sv()"></label></div><button onclick="if(confirm('Стереть все данные?')){S=D0();sv();R()}">Сбросить всё</button>`;
+ <div class="c"><label>Старт программы <input type="date" value="${S.start}" onchange="S.start=this.value;sv()"></label><br><br><label>Отбой <input type="time" value="${S.sleep}" onchange="S.sleep=this.value;sv()"></label> <label>Подъём <input type="time" value="${S.wake}" onchange="S.wake=this.value;sv()"></label><br><br><label>Цель воды, стаканов <input type="number" min="4" max="14" value="${S.goal}" style="width:70px" onchange="S.goal=+this.value;sv()"></label></div><div class="c"><b>Магний B6</b><br><br><label>Старт <input type="date" value="${S.mg.s}" onchange="S.mg.s=this.value;sv()"></label> <label>Дней <input type="number" min="1" max="120" value="${S.mg.n}" style="width:70px" onchange="S.mg.n=+this.value;sv()"></label> <label>Таблеток в день <input type="number" min="1" max="6" value="${S.mg.per}" style="width:70px" onchange="S.mg.per=+this.value;sv()"></label></div><button onclick="if(confirm('Стереть все данные?')){S=D0();sv();R()}">Сбросить всё</button>`;
 function tMore(){return `<h1>Ещё</h1><div class="tabs">${[['w','Неделя'],['a','Достижения'],['n','Напоминания'],['d','Данные']].map(([k,l])=>`<button class="${k==sub?'a':''}" onclick="sub='${k}';R()">${l}</button>`).join('')}</div>`+{w:tWeek,a:tAch,n:tRem,d:tData}[sub]()}
-function R(){const x=window.scrollY;$('#v').innerHTML={t:tToday,c:tCal,s:tStress,i:tInv,m:tMore}[tab]();
- $('#nav').innerHTML=[['t','◉','Сегодня'],['c','▦','Календарь'],['s','≈','Стресс'],['i','▤','Запасы'],['m','⋯','Ещё']].map(([k,i,l])=>`<button class="${k==tab?'a':''}" onclick="tab='${k}';det=null;R();scrollTo(0,0)"><b>${i}</b>${l}</button>`).join('');scrollTo(0,x)}
+
+const BL=[
+{id:'en',n:'Английский',h:3,m:['40 слова: повторение и новые (Anki)','40 аудирование без русских субтитров','40 грамматика и упражнения','30 говорение вслух, shadowing','30 письмо: дневник на английском']},
+{id:'pi',n:'Фортепиано',h:3,m:['20 гаммы и арпеджио, все тональности','40 этюд, медленно, по тактам','50 полифония: Бах','50 пьеса или крупная форма','20 чтение с листа']},
+{id:'so',n:'Сольфеджио',h:3,m:['45 интервалы и аккорды на слух','40 диктант','40 пение с листа с названием нот','30 гармония: функции, секвенции, анализ','25 ритм, ступени, гаммы голосом']},
+{id:'be',n:'Уход и отдых',h:2,m:['30 уход по вкладке «Сегодня»','90 фильмы, ютуб, отдых (лучше на английском)']}];
+const DP=[['08:00','Сольфеджио: слух и диктант, 90 мин'],['09:45','Фортепиано: гаммы, этюд, 90 мин'],['11:30','Английский: слова, аудирование, 90 мин'],['13:00','Обед, вода, 60 мин'],['14:00','Фортепиано: Бах, пьеса, 90 мин'],['15:30','Прогулка, руки отдыхают, 30 мин'],['16:00','Сольфеджио: пение с листа, гармония, 90 мин'],['17:30','Ужин, пауза, 90 мин'],['19:00','Английский: говорение, письмо, 90 мин'],['20:30','Уход и отдых, 120 мин. Магний после ужина'],['22:30','Экран убрать, сон']];
+const MS6=['Ноты обеих рук без подсказок, гаммы до 4 знаков, мажор/минор и интервалы на слух','Все тональности по кругу квинт, трезвучия с обращениями на слух, диктант в один голос, пьесы 1–2 класса ДМШ','Септаккорды и D7 с обращениями, диктант с хроматикой, пение с листа до 3 знаков, маленькие прелюдии Баха','Модуляции в родственные, секвенции, простой диктант в 2 голоса, сонатины Клементи, английский B1+','Гармонический анализ, 2-голосный диктант с модуляцией, пение с листом с аккомпанементом, инвенции Баха','Контрольный экзамен: диктант, сольфеджирование, анализ, интонирование. Фортепиано: 3–4 класс ДМШ (с нуля) или выпуск ДМШ (при базе 3–5 лет). Английский B2'];
+const tgt=(b,d)=>b.h*60*((d||new Date()).getDay()==0?.6:1);
+const tmv=(id,k)=>((S.tm[k]||{})[id]||0);
+const live=()=>S.run?(Date.now()-S.run.t0)/6e4:0;
+const hm=m=>Math.floor(m/60)+' ч '+String(Math.floor(m%60)).padStart(2,'0')+' мин';
+function tmAdd(id,m,k){k=k||ymd(new Date());const d=S.tm[k]=S.tm[k]||{};d[id]=Math.max(0,(d[id]||0)+m)}
+function tmStop(){if(S.run){tmAdd(S.run.id,(Date.now()-S.run.t0)/6e4);S.run=null}}
+function tmGo(id){const was=S.run&&S.run.id==id;tmStop();if(!was)S.run={id,t0:Date.now()};sv();R()}
+function adj(id,m){tmAdd(id,m);sv();R()}
+function tTime(){const dt=new Date(),k=ymd(dt),dn=dnum(dt),r=S.run,mi=Math.max(0,Math.min(5,Math.floor(dn/30)));
+ const B=BL.map(b=>({b,v:tmv(b.id,k)+(r&&r.id==b.id?live():0),t:tgt(b,dt)})),dv=B.reduce((a,x)=>a+Math.min(x.v,x.t),0),dt_=B.reduce((a,x)=>a+x.t,0);
+ let h=`<div class="hero"><div class="mu">День ${dn+1} из 180</div><h1>${hm(dv)} из ${hm(dt_)}</h1><div class="bar"><i style="width:${Math.min(100,dv/dt_*100)}%"></i></div>${dt.getDay()==0?'<div class="mu">Воскресенье: норма 60%, руки и голос восстанавливаются</div>':''}</div>`;
+ B.forEach(({b,v,t})=>{const on=r&&r.id==b.id;h+=`<div class="c ${on?'cur':''}"><div class="row sp"><b>${b.n}</b><span class="mu">${hm(v)} / ${hm(t)}</span></div><div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div><div class="row"><button class="s p" onclick="tmGo('${b.id}')">${on?'⏸ Пауза':'▶ Старт'}</button><button class="s" onclick="adj('${b.id}',15)">+15</button><button class="s" onclick="adj('${b.id}',-15)">−15</button></div><div class="mu" style="margin-top:8px">${b.m.join('<br>')}</div></div>`});
+ h+='<h2>С начала программы: факт / план, часы</h2><div class="c">'+BL.map(b=>{let a=0,p=0;for(const d in S.tm)a+=S.tm[d][b.id]||0;for(let i=0;i<=dn;i++){const x=new Date(S.start+'T00:00');x.setDate(x.getDate()+i);p+=tgt(b,x)}return `<div class="row sp" style="margin-top:6px"><span>${b.n}</span><span class="mu">${Math.round(a/60)} / ${Math.round(p/60)}</span></div><div class="bar" style="margin:3px 0"><i style="width:${p?Math.min(100,a/p*100):0}%"></i></div>`}).join('')+'</div>';
+ h+='<h2>Режим дня</h2><div class="c">'+DP.map(x=>`<div class="row sp" style="padding:4px 0;border-bottom:1px solid var(--gb)"><b>${x[0]}</b><span class="mu" style="text-align:right">${x[1]}</span></div>`).join('')+'<div class="mu" style="margin-top:8px">Фортепиано сидеть не больше 45–50 минут подряд, затем 10 минут перерыв. Боль в кисти или предплечье: стоп.</div></div>';
+ h+='<h2>Цели по месяцам</h2><div class="c">'+MS6.map((x,i)=>`<div style="padding:6px 0;${i==mi?'color:var(--a)':'color:var(--mu)'}"><b>Месяц ${i+1}.</b> ${x}</div>`).join('')+'</div>';
+ return h}
+setInterval(()=>{if(tab=='p'&&S.run)R()},20000);
+function R(){const x=window.scrollY;$('#v').innerHTML={t:tToday,p:tTime,c:tCal,s:tStress,i:tInv,m:tMore}[tab]();
+ $('#nav').innerHTML=[['t','◉','Сегодня'],['p','♪','Время'],['c','▦','Календарь'],['s','≈','Стресс'],['i','▤','Запасы'],['m','⋯','Ещё']].map(([k,i,l])=>`<button class="${k==tab?'a':''}" onclick="tab='${k}';det=null;R();scrollTo(0,0)"><b>${i}</b>${l}</button>`).join('');scrollTo(0,x)}
 R();tick();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
