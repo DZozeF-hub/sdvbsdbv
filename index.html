@@ -41,11 +41,12 @@ const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const fd=k=>{const d=new Date(k+'T00:00');return d.getDate()+' '+MN[d.getMonth()]};
 const esc=t=>String(t||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const DR=()=>[{id:'r1',t:'07:30',k:'task',s:0,on:1},{id:'r2',t:'09:30',k:'stress',s:'m',on:1},{id:'r3',t:'12:30',k:'task',s:1,on:1},{id:'r4',t:'13:00',k:'water',on:1},{id:'r5',t:'15:00',k:'stress',s:'d',on:1},{id:'r6',t:'17:00',k:'water',on:1},{id:'r7',t:'20:00',k:'stress',s:'e',on:1},{id:'r8',t:'21:30',k:'task',s:2,on:1},{id:'r9',t:'22:30',k:'text',x:'Экран убрать, скоро спать',on:1}];
+const DR=()=>[{id:'r1',t:'07:30',k:'task',s:0,on:1},{id:'r2',t:'09:30',k:'stress',s:'m',on:1},{id:'r3',t:'12:30',k:'task',s:1,on:1},{id:'r4',t:'13:00',k:'water',on:1},{id:'r5',t:'15:00',k:'stress',s:'d',on:1},{id:'r6',t:'17:00',k:'water',on:1},{id:'r7',t:'20:00',k:'stress',s:'e',on:1},{id:'r8',t:'21:30',k:'task',s:2,on:1},{id:'r9',t:'22:30',k:'text',x:'Экран убрать, скоро спать',on:1},{id:'rd3',t:'10:00',k:'text',x:'Витамин D3 с едой',on:1}];
 const D0=()=>({start:ymd(new Date()),checks:{},water:{},stress:{},inv:{},log:{},sleep:'23:00',wake:'07:00',goal:8,custom:[],ov:{},buys:[],ul:{},rem:DR(),fired:{}});
 let S;try{S=Object.assign(D0(),JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){S=D0()}
+if(!S.rem.some(r=>r.id=='rd3'))S.rem.push({id:'rd3',t:'10:00',k:'text',x:'Витамин D3 с едой',on:1});
 const sv=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
-const P=[{id:'sh',pr:748,n:'Шампунь VOIS',v:1000,d:6,w:3},{id:'co',pr:881,n:'Кондиционер VOIS',v:1000,d:8,w:3},{id:'oil',pr:763,n:'Аргановое масло',v:100,d:.1,w:3},{id:'spf',pr:369,n:'SPF 50+',v:50,d:1,w:7},{id:'nia',pr:350,n:'Ниацинамид 10%',v:30,d:.2,w:7},{id:'vc',pr:314,n:'Витамин C 5%',v:30,d:.3,w:7},{id:'cr',pr:271,n:'Крем с гиалуроном',v:50,d:.6,w:7},{id:'hand',pr:953,n:'Крем для рук',v:550,d:1,w:7}];
+const P=[{id:'sh',pr:757,n:'Шампунь VOIS',v:1000,d:6,w:3},{id:'co',pr:909,n:'Кондиционер VOIS',v:1000,d:8,w:3},{id:'oil',pr:827,n:'Аргановое масло',v:100,d:.1,w:3},{id:'spf',pr:370,n:'SPF 50+',v:50,d:1,w:7},{id:'vc',pr:314,n:'Витамин C 5%',v:30,d:.3,w:7},{id:'hand',pr:960,n:'Крем для рук',v:550,d:1,w:7}];
 const SL=['Утро','День','Вечер','Сон'];
 const dnum=dt=>Math.floor((new Date(ymd(dt)+'T00:00')-new Date(S.start+'T00:00'))/864e5);
 function tasks(dt){
@@ -54,9 +55,9 @@ function tasks(dt){
  a(0,'ch','Зарядка 5–7 минут: суставы, наклоны, приседания, планка');
  a(0,'tb','Почистить зубы, 2 минуты');
  a(0,'bha','Умывалка BHA, до 30 секунд');
- if(dn==0)a(0,'pt','Проба на запястье: SPF, крем, крем для рук. Сутки без реакции, тогда начинайте');
- if(dn>=21&&(dn>=35||dn%2==1))a(0,'vc','Витамин C на лицо','vc','2–3 капли, до ниацинамида');
- if(dn>=1&&(dn>=15||dn%2==1))a(0,'nia','Ниацинамид','nia','3–5 капель');
+ a(0,'d3','Витамин D3 с едой, где есть жиры',null,'доза по упаковке или по анализу, не увеличивать');
+ if(dn==0)a(0,'pt','Проба на запястье: SPF, витамин C, крем для рук. Сутки без реакции, тогда начинайте');
+ if(dn>=21&&(dn>=35||dn%2==1))a(0,'vc','Витамин C на лицо','vc','2–3 капли на чистую кожу, до SPF');
  if(dn>=1)a(0,'spf','SPF 50+ последним шагом, всегда','spf','две фаланги на лицо и шею');
  a(1,'mv','Разминка 3 минуты: шея, плечи, кисти, пройтись');
  a(1,'fc','Не трогать лицо, прыщи не давить');
@@ -64,11 +65,13 @@ function tasks(dt){
  if(w==3||w==0)a(2,'ft','Парить ноги 10–15 минут, затем крем');
  if(w==1||w==5)a(2,'hd','Парить руки 5–10 минут');
  a(2,'bha2','Умывалка BHA: смыть SPF, массаж 60 секунд');
- if(dn>=1)a(2,'cr','Крем с гиалуроновой кислотой, тонким слоем','cr');
  a(2,'hand','Крем для рук','hand');
  a(2,'tb2','Зубы и нить, 2 минуты');
  a(2,'st','Растяжка 10 минут: спина, бёдра, шея, грудь');
  if(w==0)a(2,'chk','Проверить запасы во вкладке «Запасы»');
+ a(2,'sm','Массаж кожи головы 3–5 минут подушечками пальцев, без ногтей и сильного нажима');
+ if(dt.getDate()==1||dn==0)a(2,'ph','Фото пробора и линии роста при одинаковом свете. Раз в месяц, так виден реальный прогресс');
+ (S.custom||[]).forEach(p=>{if(p.sl==null||p.sl<0)return;const q=p.w,wd={1:[1],2:[1,4],3:[1,3,5],4:[1,2,4,5],5:[1,2,3,4,5],6:[1,2,3,4,5,6]}[Math.round(q)]||[];if(q>=7||(q==3.5?dn%2==0:wd.includes(w)))a(+p.sl,'x'+p.id,p.n+': '+f1(p.d)+' мл/г',p.id)});
  a(3,'sl','Лечь в '+S.sleep+', экран убрать за 30 минут');
  return T}
 const ck=k=>S.checks[k]||{};
@@ -98,15 +101,15 @@ function tToday(){const dt=new Date(),k=ymd(dt),T=tasks(dt),c=ck(k),dn=dnum(dt),
  let h=`<div class="hero"><div class="row sp"><div><div class="mu">${hr<5?'Доброй ночи':hr<12?'Доброе утро':hr<18?'Добрый день':'Добрый вечер'}</div><h1>${dt.getDate()} ${MN[dt.getMonth()]}</h1><div class="mu">День ${dn+1}, серия ${streak()}</div></div>
  <svg width="104" height="104" viewBox="0 0 104 104"><defs><linearGradient id="gr"><stop offset="0" stop-color="#5ef0d0"/><stop offset="1" stop-color="#8b7bff"/></linearGradient></defs><circle cx="52" cy="52" r="${R_}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="10"/><circle cx="52" cy="52" r="${R_}" fill="none" stroke="url(#gr)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 52 52)"/><text x="52" y="59" text-anchor="middle" fill="#eef0ff" font-size="22" font-weight="800">${Math.round(p*100)}%</text></svg></div>
  <div class="row sp mu" style="margin-top:8px"><span>Уровень ${L}</span><span>${X} / ${hi} очков</span></div><div class="bar"><i style="width:${(X-lo)/(hi-lo)*100}%"></i></div>${nx?`<div style="margin-top:6px"><span class="mu">Дальше:</span> ${nx.t}</div>`:'<div style="margin-top:6px">Всё сделано, отличный день.</div>'}</div>`;
- if(dn<21)h+=`<div class="c mu">${dn<1?'Сегодня проба средств на запястье.':dn<15?'Ниацинамид через день, первые 2 недели.':'Ниацинамид каждый день. Витамин C с 22-го дня.'}</div>`;
+ if(dn<21)h+=`<div class="c mu">${dn<1?'Сегодня проба средств на запястье.':'Витамин C начнётся с 22-го дня.'}</div>`;
  else if(dn<35)h+=`<div class="c mu">Витамин C через день, 2 недели. Потом каждый день.</div>`;
  h+=`<div class="c"><div class="row sp"><b>Вода: ${wn} из ${S.goal}</b><span><button class="s" onclick="water('${k}',-1)">−</button> <button class="s p" onclick="water('${k}',1)">+ стакан</button></span></div><div class="bar"><i style="width:${Math.min(100,wn/S.goal*100)}%"></i></div><div class="mu">Стакан 250 мл. Пейте утром, до обеда, после обеда, вечером.</div></div>`;
  SL.forEach((s,i)=>{const L_=T.filter(t=>t.s==i);if(L_.length)h+=`<h2>${s}</h2><div class="c ${i==cs?'cur':''}">${L_.map(t=>`<div class="t ${c[t.id]?'on':''}" onclick="tog('${k}','${t.id}')"><div class="bx">${c[t.id]?'✓':''}</div><div><div class="tt">${t.t}</div>${t.h?`<div class="mu">${t.h}</div>`:''}</div></div>`).join('')}</div>`});
- h+=`<h2>Итог дня</h2><div class="c"><div class="mu">Как кожа сегодня: 1 плохо, 5 отлично</div><div class="n5">${[1,2,3,4,5].map(i=>`<button class="${g.sk==i?'a':''}" onclick="lg('${k}','sk',${g.sk==i?0:i},1)">${i}</button>`).join('')}</div><div class="row" style="margin:10px 0"><span class="mu">Сон, часов</span><input type="number" step="0.5" min="0" max="14" style="width:80px" value="${g.sl||''}" onchange="lg('${k}','sl',+this.value)"></div><textarea placeholder="Заметка: что ели, как самочувствие, что новое" oninput="lg('${k}','nt',this.value)">${esc(g.nt)}</textarea></div>
+ h+=`<h2>Итог дня</h2><div class="c"><div class="mu">Как кожа сегодня: 1 плохо, 5 отлично</div><div class="n5">${[1,2,3,4,5].map(i=>`<button class="${g.sk==i?'a':''}" onclick="lg('${k}','sk',${g.sk==i?0:i},1)">${i}</button>`).join('')}</div><div class="mu" style="margin-top:10px">Как волосы сегодня: 1 плохо, 5 отлично</div><div class="n5">${[1,2,3,4,5].map(i=>`<button class="${g.hr==i?'a':''}" onclick="lg('${k}','hr',${g.hr==i?0:i},1)">${i}</button>`).join('')}</div><div class="row" style="margin:10px 0"><span class="mu">Сон, часов</span><input type="number" step="0.5" min="0" max="14" style="width:80px" value="${g.sl||''}" onchange="lg('${k}','sl',+this.value)"></div><textarea placeholder="Заметка: что ели, как самочувствие, что новое" oninput="lg('${k}','nt',this.value)">${esc(g.nt)}</textarea></div>
  <h2>Стресс сегодня</h2><div class="c">${stressUI(k)}<div class="row sp" style="margin-top:10px"><span>${advice(fon(k))}</span><button class="s p" onclick="breathe()">Дыхание</button></div></div>`;return h}
 function dayView(k){const T=tasks(new Date(k+'T00:00')),c=ck(k),s=S.stress[k]||{},g=S.log[k]||{},f=fon(k),done=T.filter(t=>c[t.id]),p=pct(k);
  const row=(t,on)=>`<div class="t ${on?'on':'no'}" onclick="tog('${k}','${t.id}')"><div class="bx">${on?'✓':''}</div><div class="tt">${t.t}</div></div>`;
- let h=`<h2>${fd(k)}</h2><div class="ch">${T.length?`<span>Дела ${done.length} из ${T.length}</span>`:''}<span>Вода ${S.water[k]||0} из ${S.goal}</span><span>Стресс ${f?f.toFixed(1).replace('.',','):'не отмечен'}</span><span>Кожа ${g.sk?g.sk+' из 5':'—'}</span><span>Сон ${g.sl?g.sl+' ч':'—'}</span></div>`;
+ let h=`<h2>${fd(k)}</h2><div class="ch">${T.length?`<span>Дела ${done.length} из ${T.length}</span>`:''}<span>Вода ${S.water[k]||0} из ${S.goal}</span><span>Стресс ${f?f.toFixed(1).replace('.',','):'не отмечен'}</span><span>Кожа ${g.sk?g.sk+' из 5':'—'}</span><span>Волосы ${g.hr?g.hr+' из 5':'—'}</span><span>Сон ${g.sl?g.sl+' ч':'—'}</span></div>`;
  h+=`<div class="c"><b>Уровень стресса</b><div class="row sp" style="margin-top:6px">${[['m','Утро'],['d','День'],['e','Вечер']].map(([a,l])=>`<span class="mu">${l}: <b style="color:${s[a]?sc(s[a]):'inherit'}">${s[a]||'—'}</b></span>`).join('')}<span class="mu">Фон: <b style="color:${f?sc(f):'inherit'}">${f?f.toFixed(1).replace('.',','):'—'}</b></span></div></div>`;
  if(T.length){h+=`<div class="c"><b>Сделано</b>${done.length?done.map(t=>row(t,1)).join(''):'<div class="mu" style="margin-top:6px">Ничего не отмечено</div>'}</div>`;const m=T.filter(t=>!c[t.id]);if(m.length&&k<=ymd(new Date()))h+=`<div class="c"><b>Не сделано</b>${m.map(t=>row(t,0)).join('')}</div>`}
  else h+='<div class="c mu">До старта программы.</div>';
@@ -134,28 +137,29 @@ function tDet(id){const p=allP().find(x=>x.id==id);if(!p){det=null;return tInv()
  <div class="row"><button class="p" onclick="bForm('${p.id}')">+ Докупил</button><button onclick="spend('${p.id}')">Списать</button><button onclick="pForm('${p.id}')">Изменить</button>${p.c?`<button onclick="delC('${p.id}')">Удалить</button>`:''}</div>`}
 function tInv(){if(det)return tDet(det);if(isub=='s')return `<div class="row sp"><h1>Статистика</h1><button class="p" onclick="pForm()">+ Добавить</button></div>${seg()}`+tStat();const L=allP().map(p=>({p,c:calc(p)})),ym=L.reduce((a,x)=>a+x.c.yr/12,0),yy=L.reduce((a,x)=>a+x.c.yr,0),by=L.reduce((a,x)=>a+x.c.buy,0);
  let h=`<div class="row sp"><h1>Запасы</h1><button class="p" onclick="pForm()">+ Добавить</button></div>${seg()}<div class="c"><div class="row sp"><span class="mu">Уход в месяц</span><b>${rub(ym)}</b></div><div class="row sp"><span class="mu">В год</span><b>${rub(yy)}</b></div><div class="row sp"><span class="mu">Докупить за год</span><b>${rub(by)}</b></div></div>`;
- L.forEach(({p,c})=>{h+=`<div class="c"><div class="row sp"><b>${p.n}</b><button class="s" onclick="det='${p.id}';R();scrollTo(0,0)">Отчёт</button></div><div class="bar"><i style="width:${Math.min(100,c.rem/c.tot*100)}%"></i></div><div class="mu">Осталось ${f1(c.rem)} из ${f1(c.tot)}. Хватит ~${Math.floor(c.left)} дн., до ${dAdd(c.left)}.</div><div class="mu">В месяц ${f1(c.rate*30.4)}${c.price?', '+rub(c.yr/12)+'; в год '+rub(c.yr):''}</div>${c.sh>0?`<div class="w" style="font-size:13px">На год не хватает ~${Math.ceil(c.sh)} (${c.k} уп.)</div>`:'<div class="mu">Хватает на год</div>'}<div class="row" style="margin-top:8px"><button class="s p" onclick="bForm('${p.id}')">+ Докупил</button><button class="s" onclick="spend('${p.id}')">Списать</button><button class="s" onclick="{const o=S.inv['${p.id}']||{};S.inv['${p.id}']={used:0,add:0,price:o.price,tot:o.tot,log:o.log};sv();R()}">Новая</button>${p.c?`<button class="s" onclick="use('${p.id}',1);sv();R()">Использовал</button>`:''}</div></div>`});
+ L.forEach(({p,c})=>{h+=`<div class="c"><div class="row sp"><b>${p.n}</b><button class="s" onclick="det='${p.id}';R();scrollTo(0,0)">Отчёт</button></div><div class="bar"><i style="width:${Math.min(100,c.rem/c.tot*100)}%"></i></div><div class="mu">Осталось ${f1(c.rem)} из ${f1(c.tot)}. Хватит ~${Math.floor(c.left)} дн., до ${dAdd(c.left)}.</div><div class="mu">В месяц ${f1(c.rate*30.4)}${c.price?', '+rub(c.yr/12)+'; в год '+rub(c.yr):''}</div>${c.sh>0?`<div class="w" style="font-size:13px">На год не хватает ~${Math.ceil(c.sh)} (${c.k} уп.)</div>`:'<div class="mu">Хватает на год</div>'}${p.v/c.rate>540?`<div class="w" style="font-size:13px">Упаковки хватит на ${Math.round(p.v/c.rate/30)} мес., дольше срока хранения. Лучше взять меньший объём</div>`:''}<div class="row" style="margin-top:8px"><button class="s p" onclick="bForm('${p.id}')">+ Докупил</button><button class="s" onclick="spend('${p.id}')">Списать</button><button class="s" onclick="{const o=S.inv['${p.id}']||{};S.inv['${p.id}']={used:0,add:0,price:o.price,tot:o.tot,log:o.log};sv();R()}">Новая</button><button class="s" onclick="use('${p.id}',1);sv();R()">−1 раз (${f1(p.d)})</button></div></div>`});
  return h}
 let isub='l',usp=null;
 const MS=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const TPL=[['Шампунь',250,6,3],['Крем',50,.6,7],['Сыворотка',30,.3,7],['Масло',100,.1,3],['SPF',50,1,7],['Маска',200,10,1]];
+const TPL=[['Шампунь',250,6,3,-1],['Кондиционер',250,8,3,-1],['Крем для лица',50,.6,7,2],['Сыворотка',30,.3,7,0],['Масло',100,.1,3,-1],['SPF',50,1,7,0],['Маска',200,10,1,-1],['Крем для рук',75,1,7,2]];
 const FQ=[['Каждый день',7],['Через день',3.5],['3 раза',3],['2 раза',2],['1 раз',1]];
 const seg=()=>`<div class="tabs">${[['l','Средства'],['s','Статистика']].map(([k,l])=>`<button class="${k==isub?'a':''}" onclick="isub='${k}';R()">${l}</button>`).join('')}</div>`;
 const fv=i=>parseFloat(($('#'+i).value||'').replace(',','.'))||0;
 function sheet(t,b,ok){const o=document.createElement('div');o.id='fm';o.innerHTML=`<div><div class="row sp"><h1 style="font-size:20px">${t}</h1><button class="s" onclick="$('#fm').remove()">✕</button></div>${b}<button class="p" style="width:100%;margin-top:14px" id="fok">Сохранить</button></div>`;document.body.appendChild(o);$('#fok').onclick=()=>{if(ok()!==false)o.remove()}}
 function fPrev(){const v=fv('fv'),d=fv('fd'),w=fv('fw'),p=fv('fp'),e=$('#fpv');if(!e)return;e.innerHTML=v>0&&d>0&&w>0?`Упаковки хватит на ~<b>${Math.floor(v/(d*w/7))} дн.</b>${p?`<br>Одно применение: <b>${(p*d/v).toFixed(1)} ₽</b>, в месяц: <b>${rub(p*d*w/7*30.4/v)}</b>`:''}`:'Заполните объём, расход и частоту, и здесь появится расчёт'}
-function tpl(i){const t=TPL[i];if(!$('#fn').value)$('#fn').value=t[0];$('#fv').value=t[1];$('#fd').value=t[2];$('#fw').value=t[3];fPrev()}
+function tpl(i){const t=TPL[i];if(!$('#fn').value)$('#fn').value=t[0];$('#fs')&&($('#fs').value=t[4]);$('#fv').value=t[1];$('#fd').value=t[2];$('#fw').value=t[3];fPrev()}
 function pForm(id){const p=id&&allP().find(x=>x.id==id)||{},pc=id?pr(p):'';
  sheet(id?'Изменить средство':'Новое средство',`${id?'':`<div class="mu">Шаблон (потом можно поправить):</div><div class="ch" style="margin:6px 0">${TPL.map((t,i)=>`<span onclick="tpl(${i})" style="cursor:pointer">${t[0]}</span>`).join('')}</div>`}
  <label class="f mu">Название</label><input id="fn" value="${esc(p.n)}" placeholder="Например, Крем для лица">
  <div class="row" style="margin-top:8px"><div style="flex:1"><label class="f mu">Объём упаковки, мл/г</label><input id="fv" inputmode="decimal" value="${p.v||''}" oninput="fPrev()"></div><div style="flex:1"><label class="f mu">Цена, ₽</label><input id="fp" inputmode="decimal" value="${pc||''}" oninput="fPrev()"></div></div>
  <label class="f mu">Сколько уходит за раз, мл/г</label><input id="fd" inputmode="decimal" value="${p.d||''}" oninput="fPrev()">
  <label class="f mu">Сколько раз в неделю</label><input id="fw" inputmode="decimal" value="${p.w||''}" oninput="fPrev()"><div class="ch" style="margin-top:6px">${FQ.map(f=>`<span onclick="$('#fw').value=${f[1]};fPrev()" style="cursor:pointer">${f[0]}</span>`).join('')}</div>
+ ${(!id||p.c)?`<label class="f mu">Добавить в план дня (отметка в плане сама спишет расход)</label><select id="fs" style="width:100%"><option value="-1">Нет, только учёт запаса</option><option value="0">Утром</option><option value="2">Вечером</option></select>`:''}
  ${id?'':'<label class="row" style="margin-top:10px"><input type="checkbox" id="fb" checked style="width:20px;height:20px"> Куплено сегодня (добавить в расходы)</label>'}
  <div class="c mu" id="fpv"></div>`,()=>{const n=$('#fn').value.trim(),v=fv('fv'),d=fv('fd'),w=fv('fw'),pp=fv('fp');if(!n||v<=0||d<=0||w<=0){alert('Заполните название, объём, расход и частоту');return false}
-  if(id){const o={n,v,d,w,pr:pp};if(p.c)Object.assign(S.custom.find(x=>x.id==id),o);else S.ov[id]=o;if(S.inv[id])delete S.inv[id].price}
-  else{const nid='c'+Date.now();S.custom.push({id:nid,n,v,d,w,pr:pp,c:1});if($('#fb').checked&&pp>0)S.buys.push({d:ymd(new Date()),id:nid,n:1,s:Math.round(pp)})}
-  sv();R()});fPrev()}
+  if(id){const o={n,v,d,w,pr:pp};if(p.c)o.sl=+$('#fs').value;if(p.c)Object.assign(S.custom.find(x=>x.id==id),o);else S.ov[id]=o;if(S.inv[id])delete S.inv[id].price}
+  else{const nid='c'+Date.now();S.custom.push({id:nid,n,v,d,w,pr:pp,c:1,sl:+$('#fs').value});if($('#fb').checked&&pp>0)S.buys.push({d:ymd(new Date()),id:nid,n:1,s:Math.round(pp)})}
+  sv();R()});{const e=$('#fs');if(e)e.value=p.sl==null?-1:p.sl}fPrev();setTimeout(()=>$('#fn').focus(),50)}
 function bPrev(id){const p=allP().find(x=>x.id==id),n=fv('bn'),c=fv('bp');$('#bv').innerHTML=`Итого: <b>${rub(n*c)}</b>, в запас +<b>${f1(n*p.v)}</b> мл/г`}
 function bForm(id){const p=allP().find(x=>x.id==id);
  sheet('Докупил: '+esc(p.n),`<div class="row" style="margin-top:8px"><div style="flex:1"><label class="f mu">Упаковок</label><input id="bn" value="1" inputmode="decimal" oninput="bPrev('${id}')"></div><div style="flex:1"><label class="f mu">Цена за упаковку, ₽</label><input id="bp" value="${pr(p)||''}" inputmode="decimal" oninput="bPrev('${id}')"></div></div>

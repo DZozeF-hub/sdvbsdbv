@@ -1,4 +1,4 @@
-const C = 'glow-v7';
+const C = 'glow-v9';
 const A = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -20,8 +20,10 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // сначала сеть (обновления приходят сами), без сети отдаётся кэш
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('index.html')))
+    fetch(e.request).then(r => { const x = r.clone(); caches.open(C).then(c => c.put(e.request, x)); return r; })
+      .catch(() => caches.match(e.request).then(r => r || caches.match('index.html')))
   );
 });
 
